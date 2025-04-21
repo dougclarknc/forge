@@ -195,10 +195,11 @@ public class LimitedDeckBuilder extends DeckGeneratorBase {
         }
 
         fixDeckSize(clrCnts, landSetCode);
-
+        String name = "";
         if (deckList.size() == 40) {
             // add the main deck cards
-            final Deck result = new Deck(generateName());
+            name = String.format("%s %s", landSetCode, colors);
+            final Deck result = new Deck(name);
             result.getMain().add(deckList);
             // create the sideboard
             final CardPool cp = result.getOrCreate(DeckSection.Sideboard);
