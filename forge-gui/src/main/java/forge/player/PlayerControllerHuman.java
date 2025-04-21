@@ -257,7 +257,13 @@ public class PlayerControllerHuman extends PlayerController implements IGameCont
         final int combinedDeckSize = mainSize + sbSize;
 
         final int deckMinSize = Math.min(mainSize, gameType.getDeckFormat().getMainRange().getMinimum());
-        final Range<Integer> sbRange = gameType.getDeckFormat().getSideRange();
+        final GameType subGameType = GameType.valueOf(StringUtils.capitalize(deck.getDirectory()));
+        final Range<Integer> sbRange;
+        if (subGameType.equals(GameType.Sealed) || subGameType.equals(GameType.Draft)) {
+            sbRange = subGameType.getDeckFormat().getSideRange();
+        } else {
+            sbRange = gameType.getDeckFormat().getSideRange();
+        }
         // Limited doesn't have a sideboard max, so let the Main min take care of things.
         final int sbMax = sbRange == null ? combinedDeckSize : sbRange.getMaximum();
 
