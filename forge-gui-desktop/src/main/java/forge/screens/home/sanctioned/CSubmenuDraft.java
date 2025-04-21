@@ -8,6 +8,8 @@ import forge.deck.DeckGroup;
 import forge.deck.DeckProxy;
 import forge.game.GameType;
 import forge.game.player.RegisteredPlayer;
+import forge.gamemodes.gauntlet.GauntletData;
+import forge.gamemodes.gauntlet.GauntletUtil;
 import forge.gamemodes.limited.BoosterDraft;
 import forge.gamemodes.limited.LimitedPoolType;
 import forge.gamemodes.match.HostedMatch;
@@ -129,7 +131,17 @@ public enum CSubmenuDraft implements ICDoc {
         if (gauntlet) {
             if ("Gauntlet".equals(duelType)) {
                 final int rounds = opponentDecks.getAiDecks().size();
-                FModel.getGauntletMini().launch(rounds, humanDeck.getDeck(), gameType);
+                GauntletData gauntletData = new GauntletData(false);
+                gauntletData.setDecks(opponentDecks.getAiDecks());
+                gauntletData.setUserDeck(humanDeck.getDeck());
+                gauntletData.setName(humanDeck.getName());
+                gauntletData.setCompleted(0);
+                List<RegisteredPlayer> players = new ArrayList<>();
+                RegisteredPlayer humanPlayer = new RegisteredPlayer(humanDeck.getDeck()).setPlayer(GamePlayerUtil.getGuiPlayer());
+                players.add(humanPlayer);
+                players.add(new RegisteredPlayer(gauntletData.getDecks().get(gauntletData.getCompleted())).setPlayer(GamePlayerUtil.createAiPlayer()));
+                FModel.setGauntletData(gauntletData);
+                gauntletData.startRound(players, humanPlayer, GameType.Draft);
             } else if ("Tournament".equals(duelType)) {
                 // TODO Allow for tournament style draft, instead of always a gauntlet
             }
