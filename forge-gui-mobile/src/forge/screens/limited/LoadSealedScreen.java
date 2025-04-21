@@ -16,6 +16,7 @@ import forge.deck.FDeckEditor.EditorType;
 import forge.deck.io.DeckPreferences;
 import forge.game.GameType;
 import forge.game.player.RegisteredPlayer;
+import forge.gamemodes.gauntlet.GauntletData;
 import forge.gamemodes.match.HostedMatch;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
@@ -104,8 +105,23 @@ public class LoadSealedScreen extends LaunchScreen {
                     }
 
                     LoadingOverlay.show(Forge.getLocalizer().getMessage("lblLoadingNewGame"), true, () -> {
-                        final int matches = FModel.getDecks().getSealed().get(humanDeck.getName()).getAiDecks().size();
-                        FModel.getGauntletMini().launch(matches, humanDeck.getDeck(), GameType.Sealed);
+                        final DeckGroup opponentDecks = FModel.getDecks().getSealed().get(humanDeck.getName());
+                        final int rounds = opponentDecks.getAiDecks().size();
+                        GauntletData gauntletData = new GauntletData(false);
+                        gauntletData.setDecks(opponentDecks.getAiDecks());
+                        gauntletData.setUserDeck(humanDeck.getDeck());
+                        gauntletData.setName(humanDeck.getName());
+                        gauntletData.setCompleted(0);
+                        List<RegisteredPlayer> players = new ArrayList<>();
+                        RegisteredPlayer humanPlayer = new RegisteredPlayer(humanDeck.getDeck()).setPlayer(GamePlayerUtil.getGuiPlayer());
+                        players.add(humanPlayer);
+                        players.add(new RegisteredPlayer(gauntletData.getDecks().get(gauntletData.getCompleted())).setPlayer(GamePlayerUtil.createAiPlayer()));
+//                        gauntletData.reset();
+//                        final List<String> eventNames = new ArrayList<String>(players.size());
+//                        opponentDecks.getAiDecks().forEach(deck -> eventNames.add(deck.getName()));
+//                        gauntletData.setEventNames(eventNames);
+                        FModel.setGauntletData(gauntletData);
+                        gauntletData.startRound(players, humanPlayer, GameType.Sealed);
                     });
                 });
             } else {

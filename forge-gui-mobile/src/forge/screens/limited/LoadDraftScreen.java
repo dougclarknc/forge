@@ -16,6 +16,7 @@ import forge.deck.FDeckEditor.EditorType;
 import forge.deck.io.DeckPreferences;
 import forge.game.GameType;
 import forge.game.player.RegisteredPlayer;
+import forge.gamemodes.gauntlet.GauntletData;
 import forge.gamemodes.match.HostedMatch;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
@@ -100,11 +101,6 @@ public class LoadDraftScreen extends LaunchScreen {
             final boolean gauntlet = cbMode.getSelectedItem().equals(Forge.getLocalizer().getMessage("lblGauntlet"));
 
             if (gauntlet) {
-                final Integer rounds = SGuiChoose.getInteger(Forge.getLocalizer().getMessage("lblHowManyOpponents"),
-                        1, FModel.getDecks().getDraft().get(humanDeck.getName()).getAiDecks().size());
-                if (rounds == null) {
-                    return;
-                }
 
                 FThreads.invokeInEdtLater(() -> {
                     if (!checkDeckLegality(humanDeck)) {
@@ -112,8 +108,24 @@ public class LoadDraftScreen extends LaunchScreen {
                     }
 
                     LoadingOverlay.show(Forge.getLocalizer().getMessage("lblLoadingNewGame"), true, () -> {
-                        FModel.getGauntletMini().resetGauntletDraft();
-                        FModel.getGauntletMini().launch(rounds, humanDeck.getDeck(), GameType.Draft);
+                        final DeckGroup opponentDecks = FModel.getDecks().getDraft().get(humanDeck.getName());
+                        final int rounds = opponentDecks.getAiDecks().size();
+                        GauntletData gauntletData = new GauntletData(false);
+                        gauntletData.setDecks(opponentDecks.getAiDecks());
+                        gauntletData.setUserDeck(humanDeck.getDeck());
+                        gauntletData.setName(humanDeck.getName());
+                        List<RegisteredPlayer> players = new ArrayList<>();
+                        RegisteredPlayer humanPlayer = new RegisteredPlayer(humanDeck.getDeck()).setPlayer(GamePlayerUtil.getGuiPlayer());
+                        players.add(humanPlayer);
+                        players.add(new RegisteredPlayer(gauntletData.getDecks().get(gauntletData.getCompleted())).setPlayer(GamePlayerUtil.createAiPlayer()));
+                        gauntletData.reset();
+                        final List<String> eventNames = new ArrayList<String>(players.size());
+                        opponentDecks.getAiDecks().forEach(deck -> {
+                            eventNames.add(deck.getName());
+                        });
+                        gauntletData.setEventNames(eventNames);
+                        FModel.setGauntletData(gauntletData);
+                        gauntletData.startRound(players, humanPlayer, GameType.Draft);
                     });
                 });
             } else {
