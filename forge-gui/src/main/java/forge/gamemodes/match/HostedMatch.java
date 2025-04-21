@@ -94,7 +94,10 @@ public class HostedMatch {
         return gameRules;
     }
 
-    public void startMatch(final GameType gameType, final Set<GameType> appliedVariants, final List<RegisteredPlayer> players, final RegisteredPlayer human, final IGuiGame gui) {
+    public void startMatch(GameType gameType, final Set<GameType> appliedVariants, final List<RegisteredPlayer> players, final RegisteredPlayer human, final IGuiGame gui) {
+        if (appliedVariants != null && (appliedVariants.contains(GameType.Sealed) || appliedVariants.contains(GameType.Draft))) {
+            gameType = (GameType) appliedVariants.toArray()[0];
+        }
         startMatch(getDefaultRules(gameType), appliedVariants, players, human, gui);
     }
     public void startMatch(final GameType gameType, final Set<GameType> appliedVariants, final List<RegisteredPlayer> players, final Map<RegisteredPlayer, IGuiGame> guis) {
