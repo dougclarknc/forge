@@ -141,9 +141,13 @@ public final class GauntletData {
         return decks;
     }
 
-    public void startRound(final List<RegisteredPlayer> players, final RegisteredPlayer human) {
+    public void startRound(final List<RegisteredPlayer> players, final RegisteredPlayer human, GameType variant) {
         hostedMatch = GuiBase.getInterface().hostMatch();
-        hostedMatch.startMatch(isCommanderGauntlet ? GameType.CommanderGauntlet : GameType.Gauntlet, isCommanderGauntlet ? Collections.singleton(GameType.Commander) : null , players, human, GuiBase.getInterface().getNewGuiGame());
+        hostedMatch.startMatch(isCommanderGauntlet ? GameType.CommanderGauntlet : GameType.Gauntlet, isCommanderGauntlet ? Collections.singleton(GameType.Commander) : null/*Collections.singleton(variant)*/ , players, human, GuiBase.getInterface().getNewGuiGame());
+    }
+
+    public void startRound(final List<RegisteredPlayer> players, final RegisteredPlayer human) {
+        startRound(players, human, null);
     }
 
     public void nextRound(final List<RegisteredPlayer> players, final RegisteredPlayer human) {
